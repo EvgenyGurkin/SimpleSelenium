@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="SuiteTestname">
+<test name="TestName">
+    <groups>
+        <run>
+            <include name="demo" />
+        </run>
+    </groups>
+    <classes>
+        <class name="org.testng.xml.internal.TestNamesMatcher" />
+    </classes>
+</test>
+</suite>
+
