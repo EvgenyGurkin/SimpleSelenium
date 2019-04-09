@@ -6,9 +6,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
-
+import org.testng.TestNG;
 import java.util.concurrent.TimeUnit;
-
 
 
 public class YandexMailTest {
@@ -39,7 +38,7 @@ public class YandexMailTest {
     }
 
     private Object findElementInMail() {
-        driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name js-folders-item-name']"));
+        driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name']"));
         return driver;
     }
 
@@ -92,10 +91,12 @@ public class YandexMailTest {
         Actions action = new Actions(driver);
         action.sendKeys(Keys.DELETE).build().perform();
     }
+    private void refreshSite () {
+        driver.navigate().refresh();
+    }
 
     @BeforeMethod
     public void setUp() {
-        System.setProperty("webdriver.chrome.driver", "F:\\JAVA\\HomeStage\\bin\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -109,11 +110,11 @@ public class YandexMailTest {
         WebElement pass = driver.findElement(By.xpath("//*[@id=\"passp-field-passwd\"]"));
         pass.sendKeys(password);
         pass.submit();
-        driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name js-folders-item-name']"));
+        driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name']"));
 
     }
 
-    @Test  // Проверка того что мы залогинлись
+    @Test(groups = {"DL-1"})  // Проверка того что мы залогинлись
 
     public void signIn() {
         findElementInMail();
@@ -121,14 +122,14 @@ public class YandexMailTest {
     }
 
 
-    @Test // Проверка того что мы вошли в отправку писем
+    @Test(groups = {"SM-1"}) // Проверка того что мы вошли в отправку писем
     public void toSendMessage() {
         moveToWriteMail();
         checkArdessPosition();
         Assert.assertTrue(checkArdessPosition().contains("#compose"));
     }
 
-    @Test // Проверка при отправке корректного адреса письма
+    @Test(groups = {"SM-2"}) // Проверка при отправке корректного адреса письма
     public void sendMessage1() {
         moveToWriteMail();
         writeUserAdress("Seiron1@yandex.ru");
@@ -137,7 +138,7 @@ public class YandexMailTest {
         Assert.assertNotNull(findElementMessageSend());
     }
 
-    @Test // Проверка при отправке некорректного адреса письма
+    @Test(groups = {"SM-3"}) // Проверка при отправке некорректного адреса письма
     public void sendMessage2() {
         moveToWriteMail();
         writeUserAdress("abcabc");
@@ -146,62 +147,62 @@ public class YandexMailTest {
         Assert.assertNotNull(findElementMessageSendError());
     }
 
-    @Test // Проверка того что мы вошли в настройки
+    @Test(groups = {"SW-1"}) // Проверка того что мы вошли в настройки
     public void switchSettings() {
         moveToSettings();
         checkArdessPosition();
         Assert.assertTrue(checkArdessPosition().contains("#setup"));
     }
 
-    @Test   // с русского на инглиш
+    @Test(groups = {"SW-2"})   // с русского на инглиш
     public void switchLanguage1() {
         moveToSettings();
         checkLanguage();
         switchToEng();
-        driver.get("https://mail.yandex.ru/#setup");
+        refreshSite();
         checkLanguage();
         Assert.assertEquals(checkLanguage(), "English");
     }
 
-    @Test   // с инглиша на русский
+    @Test(groups = {"SW-3"})   // с инглиша на русский
     public void switchLanguage2() {
         moveToSettings();
         checkLanguage();
         switchToRus();
-        driver.get("https://mail.yandex.ru/#setup");
+        refreshSite();
         checkLanguage();
         Assert.assertFalse(checkLanguage().equals("English"));
     }
 
-    @Test // Проверка при удалении клавишей
+    @Test(groups = {"DL-2"}) // Проверка при удалении клавишей
     public void deleteMessage1() {
         int be = numberOfLetters ();
         clickOnCheckbox(2);
         clickOnCheckbox(4);
         pressDelete();
-        driver.get("https://mail.yandex.ru/#inbox");
+        refreshSite();
         int af = numberOfLetters ();
         Assert.assertFalse(be == af);
     }
 
-    @Test // Проверка при удалении кнопкой Удалить
+    @Test(groups = {"DL-2"}) // Проверка при удалении кнопкой Удалить
     public void deleteMessage2() {
         int be = numberOfLetters ();
         clickOnCheckbox(2);
         clickOnCheckbox(4);
         clickDelete();
-        driver.get("https://mail.yandex.ru/#inbox");
+        refreshSite();
         int af = numberOfLetters ();
         Assert.assertFalse(be == af);
     }
-    @Test // Проверка при удалении клавишей, а потом кнопкой Удалить
+    @Test(groups = {"DL-3"}) // Проверка при удалении клавишей, а потом кнопкой Удалить
     public void deleteMessage3() {
         int be = numberOfLetters ();
         clickOnCheckbox(2);
         pressDelete();
         clickOnCheckbox(3);
         clickDelete();
-        driver.get("https://mail.yandex.ru/#inbox");
+        refreshSite();
         int af = numberOfLetters ();
         Assert.assertFalse(be == af);
     }

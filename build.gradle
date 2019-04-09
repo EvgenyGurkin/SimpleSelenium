@@ -18,12 +18,11 @@ dependencies {
     testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
 }
 
+test {
+    systemProperties System.getProperties()
+    useTestNG {
+        threadCount = 3
+        options.parallel = 'methods'
 
-task p1(type: Test) {
-
-    ignoreFailures = true
-
-    useTestNG() {
-        options.suites 'src/test/resources/testng.xml'
     }
 }
