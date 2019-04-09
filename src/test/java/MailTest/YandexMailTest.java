@@ -6,12 +6,11 @@ import org.openqa.selenium.interactions.Actions;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
-import org.testng.TestNG;
 import java.util.concurrent.TimeUnit;
 
 
 public class YandexMailTest {
-    public ChromeDriver driver;
+    private ChromeDriver driver;
 
 
     private void moveToWriteMail() {
@@ -49,14 +48,12 @@ public class YandexMailTest {
     }
 
     private String checkArdessPosition() {
-        String adressPosition = driver.getCurrentUrl();
-        return adressPosition;
+        return driver.getCurrentUrl();
     }
 
     private String checkLanguage() {
         WebElement element = driver.findElement(By.xpath("//span[@class='b-selink__link mail-Settings-Lang']"));
-        String language = element.getText();
-        return language;
+        return element.getText();
     }
 
     private void switchToEng() {
