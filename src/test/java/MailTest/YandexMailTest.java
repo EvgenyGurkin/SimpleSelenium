@@ -6,6 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
+
 import java.util.concurrent.TimeUnit;
 
 
@@ -69,26 +70,29 @@ public class YandexMailTest {
             driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
         }
     }
-    private int numberOfLetters () {
+
+    private int numberOfLetters() {
         WebElement before = driver.findElement(By.xpath("(//span[@class='mail-NestedList-Item-Info-Extras'])[1]"));
         String bee = before.getText();
         bee = bee.replaceAll("[^0-9]+", "");
-        int be = Integer.parseInt(bee);
-        return be;
+        return Integer.parseInt(bee);
     }
 
-    private void clickOnCheckbox (int item) {
-        WebElement checkBox = driver.findElement(By.xpath("(//span[@class='_nb-checkbox-flag _nb-checkbox-normal-flag'])["+item+"]"));
+    private void clickOnCheckbox(int item) {
+        WebElement checkBox = driver.findElement(By.xpath("(//span[@class='_nb-checkbox-flag _nb-checkbox-normal-flag'])[" + item + "]"));
         checkBox.click();
     }
-    private void clickDelete () {
+
+    private void clickDelete() {
         driver.findElement(By.xpath("//span[@class='mail-Toolbar-Item-Text js-toolbar-item-title js-toolbar-item-title-delete']")).click();
     }
-    private void pressDelete () {
+
+    private void pressDelete() {
         Actions action = new Actions(driver);
         action.sendKeys(Keys.DELETE).build().perform();
     }
-    private void refreshSite () {
+
+    private void refreshSite() {
         driver.navigate().refresh();
     }
 
@@ -173,36 +177,38 @@ public class YandexMailTest {
 
     @Test(groups = {"DL-2"}) // Проверка при удалении клавишей
     public void deleteMessage1() {
-        int be = numberOfLetters ();
+        int be = numberOfLetters();
         clickOnCheckbox(2);
         clickOnCheckbox(4);
         pressDelete();
         refreshSite();
-        int af = numberOfLetters ();
+        int af = numberOfLetters();
         Assert.assertFalse(be == af);
     }
 
     @Test(groups = {"DL-2"}) // Проверка при удалении кнопкой Удалить
     public void deleteMessage2() {
-        int be = numberOfLetters ();
+        int be = numberOfLetters();
         clickOnCheckbox(2);
         clickOnCheckbox(4);
         clickDelete();
         refreshSite();
-        int af = numberOfLetters ();
+        int af = numberOfLetters();
         Assert.assertFalse(be == af);
     }
+
     @Test(groups = {"DL-3"}) // Проверка при удалении клавишей, а потом кнопкой Удалить
     public void deleteMessage3() {
-        int be = numberOfLetters ();
+        int be = numberOfLetters();
         clickOnCheckbox(2);
         pressDelete();
         clickOnCheckbox(3);
         clickDelete();
         refreshSite();
-        int af = numberOfLetters ();
+        int af = numberOfLetters();
         Assert.assertFalse(be == af);
     }
+
     @AfterMethod
     public void close() {
         driver.quit();

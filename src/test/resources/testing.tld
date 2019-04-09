@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-        <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="SuiteTestname" parallel="methods" thread-count="3" verbose="3">
     <test name="TestName" parallel="methods" thread-count="3">
         <groups>
             <run>
-                <include name="SM-.*" />
+                <include name="SM-.*"/>
             </run>
         </groups>
         <classes>
-            <class name="MailTest.YandexMailTest" />
+            <class name="MailTest.YandexMailTest"/>
         </classes>
     </test>
 </suite>
