@@ -11,6 +11,7 @@ import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -84,12 +85,6 @@ public class YandexMailTest {
     }
 
     private void switchToLanguage(Language val) {
-        Logs logs = driver.manage().logs();
-        LogEntries logEntries = logs.get(LogType.DRIVER);
-
-        for (LogEntry logEntry : logEntries) {
-            System.out.println(logEntry.getMessage());
-        }
         driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click();
         try {
             if (driver.findElement(By.xpath(val.getPath())).isEnabled()) {
@@ -97,6 +92,7 @@ public class YandexMailTest {
             }
         } catch (Exception ignored) {
         }
+        analyzeLog();
 
     }
    // private void switchToLanguage() {
@@ -156,21 +152,21 @@ public class YandexMailTest {
         driver.navigate().refresh();
     }
 
+    public void analyzeLog() {
+        LogEntries logEntries = driver.manage().logs().get(LogType.DRIVER);
+        for (LogEntry entry : logEntries) {
+            System.out.println(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+            //do something useful with the data
+        }
+    }
+
     @BeforeMethod
     public void setUp() {
-        LoggingPreferences logs = new LoggingPreferences();
-        logs.enable(LogType.BROWSER, Level.FINE);
-        logs.enable(LogType.CLIENT, Level.SEVERE);
-        logs.enable(LogType.DRIVER, Level.INFO);
-        logs.enable(LogType.PERFORMANCE, Level.INFO);
-        logs.enable(LogType.SERVER, Level.ALL);
-
-        DesiredCapabilities desiredCapabilities = DesiredCapabilities.chrome();
-        desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
-
-
-
-        driver = new ChromeDriver(desiredCapabilities);
+        DesiredCapabilities caps = DesiredCapabilities.chrome();
+        LoggingPreferences logPrefs = new LoggingPreferences();
+        logPrefs.enable(LogType.DRIVER, Level.INFO);
+        caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+        driver = new ChromeDriver(caps);
         //driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
