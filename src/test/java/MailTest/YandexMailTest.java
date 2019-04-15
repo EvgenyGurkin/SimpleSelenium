@@ -2,17 +2,47 @@ package MailTest;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.*;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 
 public class YandexMailTest {
     private ChromeDriver driver;
 
+
+    enum Language {
+        EN("//a[@data-params='lang=en']"),
+        RU("//a[@data-params='lang=ru']"),
+        TR("//a[@data-params='lang=tr']"),
+        TT("//a[@data-params='lang=tt']"),
+        UK("//a[@data-params='lang=uk']"),
+        AZ("//a[@data-params='lang=az']"),
+        BE("//a[@data-params='lang=be']"),
+        HY("//a[@data-params='lang=hy']"),
+        KA("//a[@data-params='lang=ka']"),
+        RO("//a[@data-params='lang=ro']"),
+        KK("//a[@data-params='lang=kk']");
+
+        private String path;
+
+        private Language(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+    }
 
     private void moveToWriteMail() {
         driver.findElement(By.xpath("//a[@class='mail-ComposeButton js-main-action-compose']")).click(); //кнопка написать
@@ -33,18 +63,14 @@ public class YandexMailTest {
     }
 
     private Object findElementMessageSendError() {
-        driver.findElement(By.xpath("//*[@id=\"nb-1\"]/body/div[2]/div[5]/div/div[3]/div[3]/div[2]/div[5]/div/div[1]/div[2]/div[1]/div/div[2]/div/div/div/div"));
+        driver.findElement(By.xpath("//div[contains(@class , \"field-to-error\")]"));
         return driver;
     }
 
-    private Object findElementInMail() {
-        driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name']"));
-        return driver;
-    }
 
     private void moveToSettings() {
         driver.findElement(By.xpath("//*[@id=\"nb-3\"]")).click();  // шестеренка
-        driver.findElement(By.xpath("//*[@id=\"settings-dropdown\"]/div/div/div/a/span")).click(); // Все настройки
+        driver.findElement(By.xpath("//span[@class=\"settings-popup-title-content\"]")).click(); // Все настройки
 
     }
 
@@ -53,23 +79,33 @@ public class YandexMailTest {
     }
 
     private String checkLanguage() {
-        WebElement element = driver.findElement(By.xpath("//span[@class='b-selink__link mail-Settings-Lang']"));
-        return element.getText();
+        WebElement mainLang = driver.findElement(By.xpath("//*[@id=\"nb-1\"]"));
+        return mainLang.getAttribute("lang");
     }
 
-    private void switchToEng() {
-        if (!checkLanguage().equals("English")) {
-            driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click(); // панель языка
-            driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
-        }
-    }
+    private void switchToLanguage(Language val) {
+        Logs logs = driver.manage().logs();
+        LogEntries logEntries = logs.get(LogType.DRIVER);
 
-    private void switchToRus() {
-        if (checkLanguage().equals("English")) {
-            driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click(); // панель языка
-            driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
+        for (LogEntry logEntry : logEntries) {
+            System.out.println(logEntry.getMessage());
         }
+        driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click();
+        try {
+            if (driver.findElement(By.xpath(val.getPath())).isEnabled()) {
+                driver.findElement(By.xpath(val.getPath())).click();
+            }
+        } catch (Exception ignored) {
+        }
+
     }
+   // private void switchToLanguage() {
+   //     if (!checkLanguage().equals("English")) {
+   //         driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click(); // панель языка
+   //         driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
+   //     }
+   // }
+
 
     private int numberOfLetters() {
         WebElement before = driver.findElement(By.xpath("(//span[@class='mail-NestedList-Item-Info-Extras'])[1]"));
@@ -78,18 +114,42 @@ public class YandexMailTest {
         return Integer.parseInt(bee);
     }
 
-    private void clickOnCheckbox(int item) {
-        WebElement checkBox = driver.findElement(By.xpath("(//span[@class='_nb-checkbox-flag _nb-checkbox-normal-flag'])[" + item + "]"));
-        checkBox.click();
+    private List<String> checkAllLettersId() {
+        List<WebElement> allLetters = driver.findElements(By.xpath("//div[contains(@class, 'item-wrap')]"));
+        List<String> lettersId = new ArrayList<>();
+        for (WebElement let : allLetters) {
+            String id = let.getAttribute("data-id");
+            lettersId.add(id);
+        }
+        return lettersId;
     }
+
+    private void clickOnCheckbox(String adress) {
+        List<WebElement> checkboxes = driver.findElements(By.xpath("//span[@title='" + adress + "']//../..//span[contains(@class, \"nb-checkbox-normal\")]"));
+        for (WebElement checkBox : checkboxes) {
+            checkBox.click();
+        }
+    }
+
+    private List<String> findChekedLettersId() {
+        List<WebElement> allCheckedLetters = driver.findElements(By.xpath("//div[contains(@class, 'is-checked')]"));
+        List<String> chekedLettersId = new ArrayList<>();
+        for (WebElement letId : allCheckedLetters) {
+            String id = letId.getAttribute("data-id");
+            chekedLettersId.add(id);
+        }
+        return chekedLettersId;
+    }
+
 
     private void clickDelete() {
-        driver.findElement(By.xpath("//span[@class='mail-Toolbar-Item-Text js-toolbar-item-title js-toolbar-item-title-delete']")).click();
-    }
-
-    private void pressDelete() {
-        Actions action = new Actions(driver);
-        action.sendKeys(Keys.DELETE).build().perform();
+        driver.findElement(By.xpath("//div[contains(@title , \"(Delete)\")]")).click();
+        try {
+            if (driver.findElement(By.xpath("//button[contains(@class, \"theme_action js-confirm-mops\")]")).isDisplayed()) {
+                driver.findElement(By.xpath("//button[contains(@class, \"theme_action js-confirm-mops\")]")).click();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private void refreshSite() {
@@ -98,11 +158,24 @@ public class YandexMailTest {
 
     @BeforeMethod
     public void setUp() {
-        driver = new ChromeDriver();
+        LoggingPreferences logs = new LoggingPreferences();
+        logs.enable(LogType.BROWSER, Level.FINE);
+        logs.enable(LogType.CLIENT, Level.SEVERE);
+        logs.enable(LogType.DRIVER, Level.INFO);
+        logs.enable(LogType.PERFORMANCE, Level.INFO);
+        logs.enable(LogType.SERVER, Level.ALL);
+
+        DesiredCapabilities desiredCapabilities = DesiredCapabilities.chrome();
+        desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
+
+
+
+        driver = new ChromeDriver(desiredCapabilities);
+        //driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.get("https://yandex.ru");
-        driver.findElement(By.xpath("/html/body/div[1]/div[3]/div[1]/div/div[1]/div/a[1]")).click();
+        driver.findElement(By.xpath("//div[contains(@class , \"card_login_yes\")]")).click();
         WebElement login = driver.findElement(By.xpath("//*[@id=\"passp-field-login\"]"));
         String loginName = "Seiron1";
         login.sendKeys(loginName);
@@ -115,99 +188,78 @@ public class YandexMailTest {
 
     }
 
-    @Test(groups = {"DL-1"})  // Проверка того что мы залогинлись
 
-    public void signIn() {
-        findElementInMail();
-        Assert.assertNotNull(findElementInMail());
-    }
+  // @Test(groups = {"SM-1"}) // Проверка при отправке корректного адреса письма
+  // public void sendMessage1() {
+  //     //setUp();
+  //     moveToWriteMail();
+  //     writeUserAdress("Seiron1@yandex.ru");
+  //     sendMessage();
+  //     findElementMessageSend();
+  //     Assert.assertNotNull(findElementMessageSend());
+  // }
+
+  // @Test(groups = {"SM-2"}) // Проверка при отправке некорректного адреса письма
+  // public void sendMessage2() {
+  //     //setUp();
+  //     moveToWriteMail();
+  //     writeUserAdress("abcabc");
+  //     sendMessage();
+  //     findElementMessageSendError();
+  //     Assert.assertNotNull(findElementMessageSendError());
+  // }
+
+  // @Test(groups = {"SM-3"}) // Проверка при отправке пустого адреса!!!!!
+  // public void sendMessage3() {
+  //     //setUp();
+  //     moveToWriteMail();
+  //     sendMessage();
+  //     findElementMessageSend();
+  //     Assert.assertNotNull(findElementMessageSend());
+  // }
+
+   @Test(groups = {"SW-1"})   // с русского на инглиш
+   public void switchLanguage1() {
+       moveToSettings();
+       checkLanguage();
+       switchToLanguage(Language.EN);
+       refreshSite();
+       checkLanguage();
+       Assert.assertEquals(checkLanguage(), "en");
+   }
+  @Test(groups = {"SW-2"})   // с инглиша на русский
+   public void switchLanguage2() {
+       moveToSettings();
+       checkLanguage();
+       switchToLanguage(Language.RU);
+       refreshSite();
+       checkLanguage();
+      Assert.assertEquals(checkLanguage(), "ru");
+   }
 
 
-    @Test(groups = {"SM-1"}) // Проверка того что мы вошли в отправку писем
-    public void toSendMessage() {
-        moveToWriteMail();
-        checkArdessPosition();
-        Assert.assertTrue(checkArdessPosition().contains("#compose"));
-    }
+   // @Test(groups = {"DL-1"}) // Проверка при удалении кнопкой Удалить
+   // public void deleteMessage1() {
+   //     clickOnCheckbox("seiron1@yandex.ru");
+   //     findChekedLettersId();
+   //     clickDelete();
+   //     refreshSite();
+   //     checkAllLettersId();
+   //     Assert.assertTrue(Collections.disjoint(checkAllLettersId(), findChekedLettersId()));
+//
+   // }
+//
+//
+   // @Test(groups = {"DL-2"})
+   // // Проверка при выборе чекбоксов при удалении мы должны понять что мы выбрали те чекбоксы которые выбрали!!!!
+   // public void deleteMessage2() {
+   //     clickOnCheckbox("seiron1@yandex.ru");
+   //     findChekedLettersId();
+   //     refreshSite();
+   //     checkAllLettersId();
+   //     Assert.assertTrue(checkAllLettersId().containsAll(findChekedLettersId()));
+   // }
 
-    @Test(groups = {"SM-2"}) // Проверка при отправке корректного адреса письма
-    public void sendMessage1() {
-        moveToWriteMail();
-        writeUserAdress("Seiron1@yandex.ru");
-        sendMessage();
-        findElementMessageSend();
-        Assert.assertNotNull(findElementMessageSend());
-    }
-
-    @Test(groups = {"SM-3"}) // Проверка при отправке некорректного адреса письма
-    public void sendMessage2() {
-        moveToWriteMail();
-        writeUserAdress("abcabc");
-        sendMessage();
-        findElementMessageSendError();
-        Assert.assertNotNull(findElementMessageSendError());
-    }
-
-    @Test(groups = {"SW-1"}) // Проверка того что мы вошли в настройки
-    public void switchSettings() {
-        moveToSettings();
-        checkArdessPosition();
-        Assert.assertTrue(checkArdessPosition().contains("#setup"));
-    }
-
-    @Test(groups = {"SW-2"})   // с русского на инглиш
-    public void switchLanguage1() {
-        moveToSettings();
-        checkLanguage();
-        switchToEng();
-        refreshSite();
-        checkLanguage();
-        Assert.assertEquals(checkLanguage(), "English");
-    }
-
-    @Test(groups = {"SW-3"})   // с инглиша на русский
-    public void switchLanguage2() {
-        moveToSettings();
-        checkLanguage();
-        switchToRus();
-        refreshSite();
-        checkLanguage();
-        Assert.assertFalse(checkLanguage().equals("English"));
-    }
-
-    @Test(groups = {"DL-2"}) // Проверка при удалении клавишей
-    public void deleteMessage1() {
-        int be = numberOfLetters();
-        clickOnCheckbox(2);
-        clickOnCheckbox(4);
-        pressDelete();
-        refreshSite();
-        int af = numberOfLetters();
-        Assert.assertFalse(be == af);
-    }
-
-    @Test(groups = {"DL-2"}) // Проверка при удалении кнопкой Удалить
-    public void deleteMessage2() {
-        int be = numberOfLetters();
-        clickOnCheckbox(2);
-        clickOnCheckbox(4);
-        clickDelete();
-        refreshSite();
-        int af = numberOfLetters();
-        Assert.assertFalse(be == af);
-    }
-
-    @Test(groups = {"DL-3"}) // Проверка при удалении клавишей, а потом кнопкой Удалить
-    public void deleteMessage3() {
-        int be = numberOfLetters();
-        clickOnCheckbox(2);
-        pressDelete();
-        clickOnCheckbox(3);
-        clickDelete();
-        refreshSite();
-        int af = numberOfLetters();
-        Assert.assertFalse(be == af);
-    }
 
     @AfterMethod
     public void close() {
