@@ -1,13 +1,13 @@
 package MailTest;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 public class SearchTest {
@@ -25,7 +25,7 @@ public class SearchTest {
     private Object findMisspelMessage() {
         try {
             driver.findElement(By.xpath("//div[@class='misspell__message']"));
-        } catch (NoSuchElementException exception) {
+        } catch (NotFoundException e) {
             driver.findElement(By.xpath("//div[@class='serp-adv__found']"));
         }
         return driver;
@@ -36,7 +36,7 @@ public class SearchTest {
     public void setUp() {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
         driver.get("https://yandex.ru");
     }
 

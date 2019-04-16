@@ -2,7 +2,6 @@ package MailTest;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -11,6 +10,7 @@ import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -95,12 +95,12 @@ public class YandexMailTest {
         analyzeLog();
 
     }
-   // private void switchToLanguage() {
-   //     if (!checkLanguage().equals("English")) {
-   //         driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click(); // панель языка
-   //         driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
-   //     }
-   // }
+     private void switchToLanguage() {
+         if (!checkLanguage().equals("English")) {
+             driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click(); // панель языка
+             driver.findElement(By.xpath("(//div[@class='b-mail-dropdown__item b-mail-dropdown__item_with-icon b-mail-dropdown__item_simple'])[1]")).click();
+         }
+     }
 
 
     private int numberOfLetters() {
@@ -152,16 +152,16 @@ public class YandexMailTest {
         driver.navigate().refresh();
     }
 
-    public void analyzeLog() {
+    private void analyzeLog() {
         LogEntries logEntries = driver.manage().logs().get(LogType.DRIVER);
         for (LogEntry entry : logEntries) {
             System.out.println(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
-            //do something useful with the data
         }
     }
 
-    @BeforeMethod
+    //@BeforeMethod
     public void setUp() {
+
         DesiredCapabilities caps = DesiredCapabilities.chrome();
         LoggingPreferences logPrefs = new LoggingPreferences();
         logPrefs.enable(LogType.DRIVER, Level.INFO);
@@ -185,76 +185,79 @@ public class YandexMailTest {
     }
 
 
-  // @Test(groups = {"SM-1"}) // Проверка при отправке корректного адреса письма
-  // public void sendMessage1() {
-  //     //setUp();
-  //     moveToWriteMail();
-  //     writeUserAdress("Seiron1@yandex.ru");
-  //     sendMessage();
-  //     findElementMessageSend();
-  //     Assert.assertNotNull(findElementMessageSend());
-  // }
+    @Test(groups = {"SM-1"}) // Проверка при отправке корректного адреса письма
+    public void sendMessage1() {
+        setUp();
+        moveToWriteMail();
+        writeUserAdress("Seiron1@yandex.ru");
+        sendMessage();
+        findElementMessageSend();
+        Assert.assertNotNull(findElementMessageSend());
+    }
 
-  // @Test(groups = {"SM-2"}) // Проверка при отправке некорректного адреса письма
-  // public void sendMessage2() {
-  //     //setUp();
-  //     moveToWriteMail();
-  //     writeUserAdress("abcabc");
-  //     sendMessage();
-  //     findElementMessageSendError();
-  //     Assert.assertNotNull(findElementMessageSendError());
-  // }
+    @Test(groups = {"SM-2"}) // Проверка при отправке некорректного адреса письма
+    public void sendMessage2() {
+        setUp();
+        moveToWriteMail();
+        writeUserAdress("abcabc");
+        sendMessage();
+        findElementMessageSendError();
+        Assert.assertNotNull(findElementMessageSendError());
+    }
 
-  // @Test(groups = {"SM-3"}) // Проверка при отправке пустого адреса!!!!!
-  // public void sendMessage3() {
-  //     //setUp();
-  //     moveToWriteMail();
-  //     sendMessage();
-  //     findElementMessageSend();
-  //     Assert.assertNotNull(findElementMessageSend());
-  // }
+    @Test(groups = {"SM-3"}) // Проверка при отправке пустого адреса!!!!!
+    public void sendMessage3() {
+        setUp();
+        moveToWriteMail();
+        sendMessage();
+        findElementMessageSendError();
+        Assert.assertNotNull(findElementMessageSendError());
+    }
 
-   @Test(groups = {"SW-1"})   // с русского на инглиш
-   public void switchLanguage1() {
-       moveToSettings();
-       checkLanguage();
-       switchToLanguage(Language.EN);
-       refreshSite();
-       checkLanguage();
-       Assert.assertEquals(checkLanguage(), "en");
-   }
-  @Test(groups = {"SW-2"})   // с инглиша на русский
-   public void switchLanguage2() {
-       moveToSettings();
-       checkLanguage();
-       switchToLanguage(Language.RU);
-       refreshSite();
-       checkLanguage();
-      Assert.assertEquals(checkLanguage(), "ru");
-   }
+    @Test(groups = {"SW-1"})   // с русского на инглиш
+    public void switchLanguage1() {
+        setUp();
+        moveToSettings();
+        checkLanguage();
+        switchToLanguage(Language.EN);
+        refreshSite();
+        checkLanguage();
+        Assert.assertEquals(checkLanguage(), "en");
+    }
+
+    @Test(groups = {"SW-2"})   // с инглиша на русский
+    public void switchLanguage2() {
+        setUp();
+        moveToSettings();
+        checkLanguage();
+        switchToLanguage(Language.RU);
+        refreshSite();
+        checkLanguage();
+        Assert.assertEquals(checkLanguage(), "ru");
+    }
 
 
-   // @Test(groups = {"DL-1"}) // Проверка при удалении кнопкой Удалить
-   // public void deleteMessage1() {
-   //     clickOnCheckbox("seiron1@yandex.ru");
-   //     findChekedLettersId();
-   //     clickDelete();
-   //     refreshSite();
-   //     checkAllLettersId();
-   //     Assert.assertTrue(Collections.disjoint(checkAllLettersId(), findChekedLettersId()));
-//
-   // }
-//
-//
-   // @Test(groups = {"DL-2"})
-   // // Проверка при выборе чекбоксов при удалении мы должны понять что мы выбрали те чекбоксы которые выбрали!!!!
-   // public void deleteMessage2() {
-   //     clickOnCheckbox("seiron1@yandex.ru");
-   //     findChekedLettersId();
-   //     refreshSite();
-   //     checkAllLettersId();
-   //     Assert.assertTrue(checkAllLettersId().containsAll(findChekedLettersId()));
-   // }
+    @Test(groups = {"DL-1"}) // Проверка при удалении кнопкой Удалить
+    public void deleteMessage1() {
+        setUp();
+        clickOnCheckbox("seiron1@yandex.ru");
+        findChekedLettersId();
+        clickDelete();
+        refreshSite();
+        checkAllLettersId();
+        Assert.assertTrue(Collections.disjoint(checkAllLettersId(), findChekedLettersId()));
+    }
+
+    @Test(groups = {"DL-2"})
+
+    public void deleteMessage2() {
+        setUp();
+        clickOnCheckbox("seiron1@yandex.ru");
+        findChekedLettersId();
+        refreshSite();
+        checkAllLettersId();
+        Assert.assertTrue(checkAllLettersId().containsAll(findChekedLettersId()));
+    }
 
 
     @AfterMethod
