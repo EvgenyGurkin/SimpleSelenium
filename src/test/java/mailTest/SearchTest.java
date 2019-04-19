@@ -1,4 +1,4 @@
-package MailTest;
+package mailTest;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NotFoundException;

@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="SuiteTestname" thread-count="3" parallel="tests" >
-    <test name="TestLanguage" >
-        <parameter name="driver-name" value="chrome"/>
+<suite name="SuiteTestname" thread-count="3" parallel="tests">
+    <test name="TestLanguage">
         <groups>
             <run>
                 <include name="SW-.*"/>
             </run>
         </groups>
         <classes>
-            <class name="MailTest.YandexMailTest"/>
+            <class name="mailTest.YandexMailTest"/>
         </classes>
     </test>
-    <test name="TestSendMessage" >
-        <parameter name="driver-name" value="chrome"/>
+    <test name="TestSendMessage">
         <groups>
             <run>
                 <include name="SM-.*"/>
             </run>
         </groups>
         <classes>
-            <class name="MailTest.YandexMailTest"/>
+            <class name="mailTest.YandexMailTest"/>
         </classes>
     </test>
-    <test name="TestDeleteMessage" >
-        <parameter name="driver-name" value="chrome"/>
+    <test name="TestDeleteMessage">
         <groups>
             <run>
                 <include name="DL-.*"/>
             </run>
         </groups>
         <classes>
-            <class name="MailTest.YandexMailTest"/>
+            <class name="mailTest.YandexMailTest"/>
         </classes>
     </test>
 </suite>

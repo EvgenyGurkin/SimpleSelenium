@@ -5,10 +5,11 @@
     <test name="TestName1">
         <groups>
             <run>
+                <include name="SW-.*"/>
             </run>
         </groups>
         <classes>
-            <class name="MailTest.SearchTest"/>
+            <class name="mailTest.YandexMailTest"/>
         </classes>
     </test>
 </suite>
