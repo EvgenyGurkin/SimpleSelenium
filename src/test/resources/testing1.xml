@@ -9,7 +9,7 @@
             </run>
         </groups>
         <classes>
-            <class name="mailTest.YandexMailTest"/>
+            <class name="mailtest.YandexMailTest"/>
         </classes>
     </test>
 </suite>

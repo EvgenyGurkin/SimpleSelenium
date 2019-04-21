@@ -8,7 +8,7 @@
             </run>
         </groups>
         <classes>
-            <class name="mailTest.YandexMailTest"/>
+            <class name="mailtest.YandexMailTest"/>
         </classes>
     </test>
     <test name="TestSendMessage">
@@ -18,7 +18,7 @@
             </run>
         </groups>
         <classes>
-            <class name="mailTest.YandexMailTest"/>
+            <class name="mailtest.YandexMailTest"/>
         </classes>
     </test>
     <test name="TestDeleteMessage">
@@ -28,7 +28,7 @@
             </run>
         </groups>
         <classes>
-            <class name="mailTest.YandexMailTest"/>
+            <class name="mailtest.YandexMailTest"/>
         </classes>
     </test>
 </suite>
