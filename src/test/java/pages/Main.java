@@ -49,6 +49,10 @@ public interface Main extends WebPage {
     @Description("Форма для ввода адресата и темы письма")
     AdressAndTheme adressAndTheme();
 
+    @FindBy("//div[@class='mail-Done js-done']")
+    @Description("Панель появляющаяся при успешной отправке письма")
+    MessageSend messageSend();
+
     // блок писем
 
     @FindBy("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']")
@@ -62,6 +66,7 @@ public interface Main extends WebPage {
     @FindBy("//div[contains(@class , \"tooltip___entities_[object Object] mail-Statusline\")]")
     @Description("Панель предупреждения при удалении")
     DeleteWarning DeleteWarning();
+
 
 
 }

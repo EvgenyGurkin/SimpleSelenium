@@ -1,6 +1,6 @@
-plugins {
-    id 'java'
-}
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'io.qameta.allure'
 
 group 'Seiron'
 version '1.0-SNAPSHOT'
@@ -11,25 +11,40 @@ compileJava.options.encoding = 'UTF-8'
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    jcenter()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
-    compile 'com.github.eroshenkoam:htmlelements:2.0.0'
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: '3.141.59'
+    compile     'com.github.eroshenkoam:htmlelements:2.0.0'
+    compile     group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.53.0'
+    compile     group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: '3.7.1'
     testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
     testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
-    implementation 'com.github.User:Repo:Tag'
 }
 
-test {
-    systemProperties System.getProperties()
-    useTestNG {
-        threadCount = 3
-        options.parallel = 'methods'
+//конфигурация для аллюр репорта
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "io.qameta.allure:allure-gradle:2.5"
+    }
+}
 
+allure {
+    version = '2.7.0'
+    aspectjweaver = true
+    autoconfigure = true
+}
+
+task p1(type: Test) {
+    ignoreFailures = true
+    useTestNG() {
+        options.suites 'src/test/resources/testingShow.xml'
     }
 }
