@@ -2,29 +2,18 @@
 <?javac -encoding utf-8 ?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <!--<suite name="Тестируем яндекс почту">-->
-<suite name="Тестируем яндекс почту" parallel="tests" thread-count="1" >
+<suite name="Тестируем яндекс почту" parallel="tests" thread-count="3">
 
-    <test name="Все тесты OKEY">
+
+    <test name="Проверяем отпрвку сообщений">
         <groups>
             <run>
-                <include name="SW-1"/>
+                <include name="SM-.*"/>
             </run>
         </groups>
         <classes>
             <class name="pagemodels.YandexNew"/>
         </classes>
     </test>
-
-    <test name="Проверяем только эту функциональность">
-        <groups>
-            <run>
-                <include name="SW-2"/>
-            </run>
-        </groups>
-        <classes>
-            <class name="pagemodels.YandexNew"/>
-        </classes>
-    </test>
-
 
 </suite>

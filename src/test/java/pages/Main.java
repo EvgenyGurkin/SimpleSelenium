@@ -68,7 +68,6 @@ public interface Main extends WebPage {
     DeleteWarning DeleteWarning();
 
 
-
 }
 
 

@@ -13,4 +13,7 @@ public interface ToolbarBox extends ExtendedWebElement {
     @Description("Чекбокс для выделения всего списка писем")
     ExtendedWebElement checkAllCheckbox();
 
+    @FindBy("//*[@id=\"nb-1\"]/body/div[2]/div[6]/div/div[3]/div[3]/div[2]/div[2]/div[2]/div/a/span[2]")
+    @Description("Чекбокс для для поднятия строки вверх")
+    ExtendedWebElement upButton();
 }

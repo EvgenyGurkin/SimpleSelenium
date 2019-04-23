@@ -1,9 +1,9 @@
 package elements;
 
-        import io.qameta.htmlelements.annotation.Description;
-        import io.qameta.htmlelements.annotation.FindBy;
-        import io.qameta.htmlelements.annotation.Param;
-        import io.qameta.htmlelements.element.ExtendedWebElement;
+import io.qameta.htmlelements.annotation.Description;
+import io.qameta.htmlelements.annotation.FindBy;
+import io.qameta.htmlelements.annotation.Param;
+import io.qameta.htmlelements.element.ExtendedWebElement;
 
 
 public interface LangAndSettings extends ExtendedWebElement {
@@ -12,6 +12,6 @@ public interface LangAndSettings extends ExtendedWebElement {
     ExtendedWebElement langSettingsButton();
 
     @Description("Кнопка выбранного языка")
-    @FindBy("{lang}")
-    ExtendedWebElement allLangButtons(@Param("lang") String pathForLang);
+    @FindBy("{{ lang }}")
+    ExtendedWebElement allLangButtons(@Param("lang") String lang);
 }

@@ -7,6 +7,7 @@ import io.qameta.htmlelements.element.ExtendedList;
 import io.qameta.htmlelements.element.ExtendedWebElement;
 import io.qameta.htmlelements.matcher.DisplayedMatcher;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
@@ -46,22 +47,19 @@ public class YandexNew {
         }
     }
 
-//    private WebPageFactory factory;
-//    private WebDriver driver;
-//    private Main mainPage = factory.get(driver, Main.class);
 
     WebPageFactory factory = new WebPageFactory();
     WebDriver driver;
     Main mainPage;
 
-    @BeforeMethod(alwaysRun = true, description = "Перешли по адресу 123")
+    @BeforeMethod(alwaysRun = true, description = "Перешли по адресу yandex.ru")
     private void setUp() {
         driver = new ChromeDriver();
         mainPage = factory.get(driver, Main.class);
         mainPage.getWrappedDriver().manage().window().maximize();
         mainPage.go();
         mainPage.authorization().mailAuthorizationButton()
-                .waitUntil("Тут сообщение", DisplayedMatcher.displayed(), 5);
+                .waitUntil("Ожидание кнопки войти", DisplayedMatcher.displayed(), 5);
     }
 
     @AfterMethod(alwaysRun = true, description = "Выключили драйвер")
@@ -69,7 +67,7 @@ public class YandexNew {
         mainPage.getWrappedDriver().close();
     }
 
-    @Step("Зашли в почту {emailName} под таким то паролем {password}")
+    @Step("Зашли в почту {emailName} под паролем {password}")
     private void quickLogin(String emailName, String password) {
         mainPage.authorization().mailAuthorizationButton().click();
         mainPage.loginForm().loginField().sendKeys(emailName);
@@ -78,7 +76,7 @@ public class YandexNew {
         mainPage.passForm().passFormButton().click();
     }
 
-    @Step("Перейти в режим настройки почты")
+    @Step("Перешли в режим настройки почты")
     private void goInSettings() {
         mainPage.settingsControl().settingsGhostButton().click();
         mainPage.allSettings().allSettingsButton().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
@@ -87,13 +85,12 @@ public class YandexNew {
     }
 
 
-
-    @Step("Перейти в режим отправки письма")
+    @Step("Перешли в раздел отправки письма")
     private void goWriteLetter() {
         mainPage.leftMailPanel().goToWriteButton().click();
     }
 
-    @Step("Отправить сообщение с емайл адресом: {mailArdess}")
+    @Step("Отправили сообщение с емайл адресом: {mailAdress}")
     private void sendLetter(String mailAdress) {
         mainPage.adressAndTheme().mailAdressField().sendKeys(mailAdress);
         mainPage.composeHead().sendMessage().click();
@@ -102,26 +99,24 @@ public class YandexNew {
 
     @Step("Проверка сообщения выдаваемого при отправке")
     private void assertSendMail() {
-        int returnDriver = 0;
+        try {
+            if (mainPage.adressAndTheme().mailAdressError().isDisplayed()) {
+                if (mainPage.adressAndTheme().mailAdressError().getText().equals("Поле не заполнено. Необходимо ввести адрес.") || mainPage.adressAndTheme().mailAdressError().getText().equals("Please enter at least one email address.")) {
+                    Assert.assertTrue(mainPage.adressAndTheme().mailAdressError().isDisplayed());
+                } else if (mainPage.adressAndTheme().mailAdressError().getText().contains("Некорректные адреса:") || mainPage.adressAndTheme().mailAdressError().getText().contains("Invalid email addresses:")) {
+                    Assert.assertTrue(mainPage.adressAndTheme().mailAdressError().isDisplayed());
+                } else {
+                    Assert.assertEquals(2, 1);
+                }
+            }
+        } catch (WebDriverException ignored) {
+        }
         try {
             if (mainPage.messageSend().succesMailSend().isDisplayed()) {
-                returnDriver = 1;
-               // Assert.assertEquals(mainPage.messageSend().succesMailSend().getText(), "Письмо отправлено.");
+                Assert.assertTrue(mainPage.messageSend().succesMailSend().isDisplayed());
             }
-       } catch (Exception ignored) {
-       }
-       try {
-            if (mainPage.adressAndTheme().mailAdressError().getText().equals("Поле не заполнено. Необходимо ввести адрес.")) {
-                returnDriver = 1;
-                //Assert.assertEquals(mainPage.adressAndTheme().mailAdressError().getText(), "Поле не заполнено. Необходимо ввести адрес.");
-            }
-            if (mainPage.adressAndTheme().mailAdressError().getText().startsWith("Некорректные адреса:")) {
-                returnDriver = 1;
-                //Assert.assertTrue(mainPage.adressAndTheme().mailAdressError().getText().startsWith("Некорректные адреса:"));
-            }
-        } catch (Exception ignored) {
+        } catch (WebDriverException ignored) {
         }
-        Assert.assertTrue(returnDriver==1);
     }
 
     @Step("Проверка счетчика писем")
@@ -155,12 +150,22 @@ public class YandexNew {
         }
         return chekedLettersId;
     }
-    @Step ("Удаление выделенных писем")
+
+    @Step("Удаление выделенных писем")
     private void deleteLetters() {
-        mainPage.toolbarBox().deleteMailButton().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
         mainPage.toolbarBox().deleteMailButton().click();
+        try {
+            mainPage.DeleteWarning().conformDeleteButton().click();
+        } catch (WebDriverException ignore) {
+        }
+
+        try {
+            mainPage.allSettings().allSettingsButton().waitUntil("Ожидание отображения каунтера", DisplayedMatcher.displayed(), 3);
+        } catch (Exception ignored) {
+        }
     }
-    @Step ("Проверка удаления писем")
+
+    @Step("Проверка удаления писем")
     private void assertDeleteLetters(List<String> temp1, List<String> temp2, int before, int after, String status) {
         if (status.equals("delete")) {
             Assert.assertEquals(after, before - temp1.size());
@@ -171,37 +176,22 @@ public class YandexNew {
             Assert.assertTrue(temp2.containsAll(temp1));
         }
     }
-    @Step ("Смена языка на {lang}")
-    private void swithcLanguage(Language lang) {
-        ExtendedWebElement pathForLang = mainPage.langAndSettings().allLangButtons(lang.getPath());
 
+    @Step("Смена языка на {lang}")
+    private void swithLanguage(Language lang) {
         mainPage.langAndSettings().langSettingsButton().click();
-        pathForLang.click();
-        //mainPage.langAndSettings().allLangButtons(pathForLang).click();
-        //mainPage.langAndSettings().allLangButtons(pathForLang).waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
-
-
-       // driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click();
-       // try {
-       //     if (driver.findElement(By.xpath(val.getPath())).isEnabled()) {
-       //         driver.findElement(By.xpath(val.getPath())).click();
-       //     }
-       // } catch (Exception e) {
-       //     logger.error("Мы не меняли язык потому что нужный нам язык был уже установлен");
-       // }
-//
-       // WebDriverWait wait = new WebDriverWait(driver, 3);
-       // try {
-       //     wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("(//span[@class='b-selink__inner'])[1]")));
-       // } catch (Exception ignored) {
-       // }
+        try {
+            mainPage.langAndSettings().allLangButtons(lang.getPath()).click();
+        } catch (Exception ignored) {
+        }
+        mainPage.langAndSettings().langSettingsButton().click();
+        mainPage.langAndSettings().langSettingsButton().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
     }
-    @Step ("Проверка языка")
-    private void assertLanguage (Language needed) {
+
+    @Step("Проверка языка")
+    private void assertLanguage(Language needed) {
         Assert.assertEquals(mainPage.langAndSettings().langSettingsButton().getText().toLowerCase(), needed.langName.toLowerCase());
     }
-
-
 
 
     @Test(groups = "SM-1")
@@ -232,7 +222,7 @@ public class YandexNew {
     private void switchLanguageTo1() {
         quickLogin("Seiron1", "210890-=");
         goInSettings();
-        swithcLanguage(Language.EN);
+        swithLanguage(Language.EN);
         assertLanguage(Language.EN);
     }
 
@@ -240,7 +230,7 @@ public class YandexNew {
     private void switchLanguageTo2() {
         quickLogin("Seiron1", "210890-=");
         goInSettings();
-        swithcLanguage(Language.RU);
+        swithLanguage(Language.RU);
         assertLanguage(Language.RU);
     }
 
@@ -253,7 +243,7 @@ public class YandexNew {
         deleteLetters();
         List<String> Temp2 = findMailsId();
         int after = checkMailCounter();
-        assertDeleteLetters(Temp1,Temp2, before, after, "delete");
+        assertDeleteLetters(Temp1, Temp2, before, after, "delete");
     }
 
     @Test(groups = "DL-2")
@@ -264,7 +254,7 @@ public class YandexNew {
         List<String> Temp1 = findChekedMailsId();
         List<String> Temp2 = findMailsId();
         int after = checkMailCounter();
-        assertDeleteLetters(Temp1,Temp2, before, after, "nodelete");
+        assertDeleteLetters(Temp1, Temp2, before, after, "nodelete");
     }
 
 }
