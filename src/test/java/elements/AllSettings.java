@@ -6,7 +6,7 @@ import io.qameta.htmlelements.element.ExtendedWebElement;
 
 public interface AllSettings extends ExtendedWebElement {
 
-    @FindBy("//span[@class='settings-popup-title-content']")
+    @FindBy(".//span[@class='settings-popup-title-content']")
     @Description("Кнопка перехода в раздел настроек")
     ExtendedWebElement allSettingsButton();
 }

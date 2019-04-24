@@ -8,15 +8,15 @@ import io.qameta.htmlelements.element.ExtendedWebElement;
 
 public interface MessagesList extends ExtendedWebElement<MessagesList> {
     @Description("Чекбоксы всех писем по адресу  {adress}")
-    @FindBy("//span[@title='{{ adress }}']//../..//span[contains(@class,\"nb-checkbox-normal\")]")
+    @FindBy(".//span[@title='{{ adress }}']//../..//span[contains(@class,'nb-checkbox-normal')]")
     ExtendedList<MessagesList> allMailCheckBoxes(@Param("adress") String adress);
 
     @Description("Все выделенные письма")
-    @FindBy("//div[contains(@class, 'is-checked')]")
+    @FindBy(".//div[contains(@class, 'is-checked')]")
     ExtendedList<MessagesList> allChekedMail();
 
     @Description("Все письма")
-    @FindBy("//div[contains(@class, 'item-wrap')]")
+    @FindBy(".//div[contains(@class, 'item-wrap')]")
     ExtendedList<MessagesList> allMail();
 
 

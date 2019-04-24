@@ -1,6 +1,7 @@
 package pagemodels;
 
 import elements.MessagesList;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 import io.qameta.htmlelements.WebPageFactory;
 import io.qameta.htmlelements.element.ExtendedList;
@@ -10,6 +11,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -21,117 +24,95 @@ import java.util.Collections;
 import java.util.List;
 
 public class YandexNew {
-    public enum Language {
-        EN("//a[@data-params='lang=en']", "English"),
-        RU("//a[@data-params='lang=ru']", "Русский"),
-        TR("//a[@data-params='lang=tr']", "Türkçe"),
-        TT("//a[@data-params='lang=tt']", "Татарча"),
-        UK("//a[@data-params='lang=uk']", "Українська"),
-        AZ("//a[@data-params='lang=az']", "Azərbaycan"),
-        BE("//a[@data-params='lang=be']", "Беларуская"),
-        HY("//a[@data-params='lang=hy']", "Հայերեն"),
-        KA("//a[@data-params='lang=ka']", "Грузинский"),
-        RO("//a[@data-params='lang=ro']", "Română"),
-        KK("//a[@data-params='lang=kk']", "Қазақ");
-
-        private String path;
-        private String langName;
-
-        Language(String path, String langName) {
-            this.path = path;
-            this.langName = langName;
-        }
-
-        public String getPath() {
-            return path;
-        }
-    }
-
-
+    private static final Logger logger = LoggerFactory.getLogger(YandexNew.class);
     WebPageFactory factory = new WebPageFactory();
     WebDriver driver;
-    Main mainPage;
+    Main mp;
 
     @BeforeMethod(alwaysRun = true, description = "Перешли по адресу yandex.ru")
     private void setUp() {
         driver = new ChromeDriver();
-        mainPage = factory.get(driver, Main.class);
-        mainPage.getWrappedDriver().manage().window().maximize();
-        mainPage.go();
-        mainPage.authorization().mailAuthorizationButton()
+        mp = factory.get(driver, Main.class);
+        mp.getWrappedDriver().manage().window().maximize();
+        mp.go();
+        mp.authorization().mailAuthorizationButton()
                 .waitUntil("Ожидание кнопки войти", DisplayedMatcher.displayed(), 5);
     }
 
     @AfterMethod(alwaysRun = true, description = "Выключили драйвер")
     private void tearDown() {
-        mainPage.getWrappedDriver().close();
+        mp.getWrappedDriver().close();
     }
 
     @Step("Зашли в почту {emailName} под паролем {password}")
     private void quickLogin(String emailName, String password) {
-        mainPage.authorization().mailAuthorizationButton().click();
-        mainPage.loginForm().loginField().sendKeys(emailName);
-        mainPage.loginForm().loginFormButton().click();
-        mainPage.passForm().passField().sendKeys(password);
-        mainPage.passForm().passFormButton().click();
+        mp.authorization().mailAuthorizationButton().click();
+        mp.loginForm().loginField().sendKeys(emailName);
+        mp.loginForm().loginFormButton().click();
+        mp.passForm().passField().sendKeys(password);
+        mp.passForm().passFormButton().click();
+        mp.leftMailPanel().goToWriteButton()
+                .waitUntil("Ожидание того что мы успешно залогинились", DisplayedMatcher.displayed(), 5);
     }
 
     @Step("Перешли в режим настройки почты")
     private void goInSettings() {
-        mainPage.settingsControl().settingsGhostButton().click();
-        mainPage.allSettings().allSettingsButton().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
-        mainPage.allSettings().allSettingsButton().click();
-        mainPage.langAndSettings().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
+        mp.settingsControl().settingsGhostButton().click();
+        mp.allSettings().allSettingsButton()
+                .waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
+        mp.allSettings().allSettingsButton().click();
+        mp.langAndSettings().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
     }
-
 
     @Step("Перешли в раздел отправки письма")
     private void goWriteLetter() {
-        mainPage.leftMailPanel().goToWriteButton().click();
+        mp.leftMailPanel().goToWriteButton().click();
     }
 
     @Step("Отправили сообщение с емайл адресом: {mailAdress}")
     private void sendLetter(String mailAdress) {
-        mainPage.adressAndTheme().mailAdressField().sendKeys(mailAdress);
-        mainPage.composeHead().sendMessage().click();
+        mp.adressAndTheme().mailAdressField().sendKeys(mailAdress);
+        mp.composeHead().sendMessage().click();
     }
-
 
     @Step("Проверка сообщения выдаваемого при отправке")
     private void assertSendMail() {
         try {
-            if (mainPage.adressAndTheme().mailAdressError().isDisplayed()) {
-                if (mainPage.adressAndTheme().mailAdressError().getText().equals("Поле не заполнено. Необходимо ввести адрес.") || mainPage.adressAndTheme().mailAdressError().getText().equals("Please enter at least one email address.")) {
-                    Assert.assertTrue(mainPage.adressAndTheme().mailAdressError().isDisplayed());
-                } else if (mainPage.adressAndTheme().mailAdressError().getText().contains("Некорректные адреса:") || mainPage.adressAndTheme().mailAdressError().getText().contains("Invalid email addresses:")) {
-                    Assert.assertTrue(mainPage.adressAndTheme().mailAdressError().isDisplayed());
+            if (mp.adressAndTheme().mailAdressError().isDisplayed()) {
+                if (mp.adressAndTheme().mailAdressError().getText().endsWith(".")) {
+                    Assert.assertTrue(mp.adressAndTheme().mailAdressError().isDisplayed());
+                } else if (mp.adressAndTheme().mailAdressError().getText().contains(":")) {
+                    Assert.assertTrue(mp.adressAndTheme().mailAdressError().isDisplayed());
                 } else {
-                    Assert.assertEquals(2, 1);
+                    Assert.fail("Тест не пройден потому что ни одно из сообщений об ошибке адреса не было отображено");
                 }
             }
-        } catch (WebDriverException ignored) {
+        } catch (WebDriverException e) {
+            logger.error("Сообщения об ошибке в адресе не были найдены");
         }
         try {
-            if (mainPage.messageSend().succesMailSend().isDisplayed()) {
-                Assert.assertTrue(mainPage.messageSend().succesMailSend().isDisplayed());
+            if (mp.messageSend().succesMailSend().isDisplayed()) {
+                Assert.assertTrue(mp.messageSend().succesMailSend().isDisplayed());
             }
-        } catch (WebDriverException ignored) {
+        } catch (WebDriverException e) {
+            logger.error("Сообщение об успешной отправке письма не было найдено");
         }
     }
 
     @Step("Проверка счетчика писем")
     private int checkMailCounter() {
-        return Integer.parseInt(mainPage.leftMailPanel().extrasMailCounter().getText().replaceAll("[^0-9]+", ""));
+        return Integer.parseInt(mp.leftMailPanel().extrasMailCounter()
+                .getText().replaceAll("[^0-9]+", ""));
     }
 
     @Step("Выделение всех писем по адресу: {adress}")
     private void selectAllAdressMailCheckbox(String adress) {
-        mainPage.messagesList().allMailCheckBoxes(adress).forEach(WebElement::click);
+        mp.messagesList().allMailCheckBoxes(adress).forEach(WebElement::click);
     }
 
     @Step("Поиск всех выделенных писем")
     private List<String> findChekedMailsId() {
-        ExtendedList<MessagesList> allCheckedLetters = mainPage.messagesList().allChekedMail();
+        ExtendedList<MessagesList> allCheckedLetters = mp.messagesList().allChekedMail();
         List<String> chekedLettersId = new ArrayList<>();
         for (ExtendedWebElement letId : allCheckedLetters) {
             String id = letId.getAttribute("data-id");
@@ -142,7 +123,7 @@ public class YandexNew {
 
     @Step("Поиск всех писем")
     private List<String> findMailsId() {
-        ExtendedList<MessagesList> allCheckedLetters = mainPage.messagesList().allMail();
+        ExtendedList<MessagesList> allCheckedLetters = mp.messagesList().allMail();
         List<String> chekedLettersId = new ArrayList<>();
         for (ExtendedWebElement letId : allCheckedLetters) {
             String id = letId.getAttribute("data-id");
@@ -153,15 +134,18 @@ public class YandexNew {
 
     @Step("Удаление выделенных писем")
     private void deleteLetters() {
-        mainPage.toolbarBox().deleteMailButton().click();
+        mp.toolbarBox().deleteMailButton().click();
         try {
-            mainPage.DeleteWarning().conformDeleteButton().click();
-        } catch (WebDriverException ignore) {
+            mp.DeleteWarning().conformDeleteButton().click();
+        } catch (WebDriverException e) {
+            logger.error("Панель подтверждения удаления не была отображена");
         }
 
         try {
-            mainPage.allSettings().allSettingsButton().waitUntil("Ожидание отображения каунтера", DisplayedMatcher.displayed(), 3);
-        } catch (Exception ignored) {
+            mp.allSettings().allSettingsButton()
+                    .waitUntil("Ожидание отображения каунтера", DisplayedMatcher.displayed(), 3);
+        } catch (Exception e) {
+            logger.error("Искуственное ожидание, для того чтобы на странице успели обновится все элементы");
         }
     }
 
@@ -170,29 +154,37 @@ public class YandexNew {
         if (status.equals("delete")) {
             Assert.assertEquals(after, before - temp1.size());
             Assert.assertTrue(Collections.disjoint(temp1, temp2));
+
         }
         if (status.equals("nodelete")) {
             Assert.assertEquals(after, before);
             Assert.assertTrue(temp2.containsAll(temp1));
+
         }
+        Allure.addAttachment("Результат", "text/plain", "На странице было выделено " + temp1.size()
+                + " писем, после удаления на странице осталось "
+                + temp2.size() + " писем." + "\n" + "До удаления было " + before
+                + " писем, после удаления осталось " + after + " писем.");
     }
 
     @Step("Смена языка на {lang}")
     private void swithLanguage(Language lang) {
-        mainPage.langAndSettings().langSettingsButton().click();
+        mp.langAndSettings().langSettingsButton().click();
         try {
-            mainPage.langAndSettings().allLangButtons(lang.getPath()).click();
-        } catch (Exception ignored) {
+            mp.langAndSettings().allLangButtons(lang.getPath()).click();
+        } catch (Exception e) {
+            logger.error("Кнопка смены языка не была найдена потому что уже установлен нужный нам язык");
         }
-        mainPage.langAndSettings().langSettingsButton().click();
-        mainPage.langAndSettings().langSettingsButton().waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
+        mp.langAndSettings().langSettingsButton().click();
+        mp.langAndSettings().langSettingsButton()
+                .waitUntil("Ожидание кнопки", DisplayedMatcher.displayed(), 5);
     }
 
     @Step("Проверка языка")
     private void assertLanguage(Language needed) {
-        Assert.assertEquals(mainPage.langAndSettings().langSettingsButton().getText().toLowerCase(), needed.langName.toLowerCase());
+        Assert.assertEquals(mp.langAndSettings().langSettingsButton()
+                .getText().toLowerCase(), needed.langName.toLowerCase());
     }
-
 
     @Test(groups = "SM-1")
     private void sendMessageCorrect() {
@@ -255,6 +247,32 @@ public class YandexNew {
         List<String> Temp2 = findMailsId();
         int after = checkMailCounter();
         assertDeleteLetters(Temp1, Temp2, before, after, "nodelete");
+    }
+
+    public enum Language {
+        EN("en", "English"),
+        RU("ru", "Русский"),
+        TR("tr", "Türkçe"),
+        TT("tt", "Татарча"),
+        UK("uk", "Українська"),
+        AZ("az", "Azərbaycan"),
+        BE("be", "Беларуская"),
+        HY("hy", "Հայերեն"),
+        KA("ka", "Грузинский"),
+        RO("ro", "Română"),
+        KK("kk", "Қазақ");
+
+        private String path;
+        private String langName;
+
+        Language(String path, String langName) {
+            this.path = path;
+            this.langName = langName;
+        }
+
+        public String getPath() {
+            return path;
+        }
     }
 
 }

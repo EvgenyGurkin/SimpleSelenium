@@ -11,7 +11,7 @@ public interface Main extends WebPage {
 
     // блок авторизации
 
-    @FindBy("//div[contains(@class , \"card_login_yes\")]")
+    @FindBy("//div[contains(@class , 'i-bem desk-notif_js_inited')]")
     @Description("Блок авторизации")
     Authorization authorization();
 
@@ -63,7 +63,7 @@ public interface Main extends WebPage {
     @Description("Блок управления письмами")
     ToolbarBox toolbarBox();
 
-    @FindBy("//div[contains(@class , \"tooltip___entities_[object Object] mail-Statusline\")]")
+    @FindBy("//div[contains(@class , 'tooltip___entities_[object Object] mail-Statusline')]")
     @Description("Панель предупреждения при удалении")
     DeleteWarning DeleteWarning();
 

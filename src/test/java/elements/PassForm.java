@@ -5,11 +5,11 @@ import io.qameta.htmlelements.annotation.FindBy;
 import io.qameta.htmlelements.element.ExtendedWebElement;
 
 public interface PassForm extends ExtendedWebElement {
-    @FindBy("//*[@id=\"passp-field-passwd\"]")
+    @FindBy(".//*[@id='passp-field-passwd']")
     @Description("Поле для ввода пароля авторизации")
     ExtendedWebElement passField();
 
-    @FindBy("//button[contains(@class, \"passp-form-button\")]")
+    @FindBy(".//button[contains(@class, 'passp-form-button')]")
     @Description("Кнопка отправки пароля")
     ExtendedWebElement passFormButton();
 }

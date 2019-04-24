@@ -4,11 +4,30 @@
 <!--<suite name="Тестируем яндекс почту">-->
 <suite name="Тестируем яндекс почту" parallel="tests" thread-count="3">
 
-
-    <test name="Проверяем отпрвку сообщений">
+    <test name="Проверяем удаление писем">
+        <groups>
+            <run>
+                <include name="DL-.*"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="pagemodels.YandexNew"/>
+        </classes>
+    </test>
+    <test name="Проверяем отправку писем">
         <groups>
             <run>
                 <include name="SM-.*"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="pagemodels.YandexNew"/>
+        </classes>
+    </test>
+    <test name="Проверяем смену языка">
+        <groups>
+            <run>
+                <include name="SW-.*"/>
             </run>
         </groups>
         <classes>

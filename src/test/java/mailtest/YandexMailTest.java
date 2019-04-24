@@ -18,35 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 
 public class YandexMailTest {
-    private ChromeDriver driver;
     private static final Logger logger = LoggerFactory.getLogger(YandexMailTest.class);
-
-
-    enum Language {
-        EN("//a[@data-params='lang=en']", "English"),
-        RU("//a[@data-params='lang=ru']", "Русский"),
-        TR("//a[@data-params='lang=tr']", "Türkçe"),
-        TT("//a[@data-params='lang=tt']", "Татарча"),
-        UK("//a[@data-params='lang=uk']", "Українська"),
-        AZ("//a[@data-params='lang=az']", "Azərbaycan"),
-        BE("//a[@data-params='lang=be']", "Беларуская"),
-        HY("//a[@data-params='lang=hy']", "Հայերեն"),
-        KA("//a[@data-params='lang=ka']", "Грузинский"),
-        RO("//a[@data-params='lang=ro']", "Română"),
-        KK("//a[@data-params='lang=kk']", "Қазақ");
-
-        private String path;
-        private String langName;
-
-        Language(String path, String langName) {
-            this.path = path;
-            this.langName = langName;
-        }
-
-        public String getPath() {
-            return path;
-        }
-    }
+    private ChromeDriver driver;
 
     private void moveToWriteMail() {
         driver.findElement(By.xpath("//a[@class='mail-ComposeButton js-main-action-compose']")).click(); //кнопка написать
@@ -83,13 +56,11 @@ public class YandexMailTest {
         return returnDriver;
     }
 
-
     private void moveToSettings() {
         driver.findElement(By.xpath("//*[@id=\"nb-3\"]")).click();  // шестеренка
         driver.findElement(By.xpath("//span[@class=\"settings-popup-title-content\"]")).click(); // Все настройки
 
     }
-
 
     private void switchToLanguage(Language val) {
         driver.findElement(By.xpath("(//span[@class='b-selink__inner'])[1]")).click();
@@ -126,7 +97,6 @@ public class YandexMailTest {
         }
     }
 
-
     private List<String> checkAllLettersId() {
         List<WebElement> allLetters = driver.findElements(By.xpath("//div[contains(@class, 'item-wrap')]"));
         List<String> lettersId = new ArrayList<>();
@@ -155,7 +125,6 @@ public class YandexMailTest {
         return chekedLettersId;
     }
 
-
     private void clickDelete() {
         driver.findElement(By.xpath("//div[contains(@title , \"(Delete)\")]")).click();
         try {
@@ -170,7 +139,6 @@ public class YandexMailTest {
         } catch (Exception ignored) {
         }
     }
-
 
     //@BeforeMethod
     public void setUp() {
@@ -190,7 +158,6 @@ public class YandexMailTest {
         driver.findElement(By.xpath("//span[@class='mail-NestedList-Item-Name']"));
 
     }
-
 
     @Test(groups = {"SM-1"}) // Проверка при отправке корректного адреса письма
     public void sendMessage1() {
@@ -234,7 +201,6 @@ public class YandexMailTest {
         Assert.assertEquals(driver.findElement(By.xpath("//span[@class='b-selink__link mail-Settings-Lang']")).getText().toLowerCase(), Language.RU.langName.toLowerCase());
     }
 
-
     @Test(groups = {"DL-1"}) // Проверка при удалении кнопкой Удалить
     public void deleteMessage1() {
         setUp();
@@ -261,5 +227,31 @@ public class YandexMailTest {
     @AfterMethod
     public void close() {
         driver.quit();
+    }
+
+    enum Language {
+        EN("//a[@data-params='lang=en']", "English"),
+        RU("//a[@data-params='lang=ru']", "Русский"),
+        TR("//a[@data-params='lang=tr']", "Türkçe"),
+        TT("//a[@data-params='lang=tt']", "Татарча"),
+        UK("//a[@data-params='lang=uk']", "Українська"),
+        AZ("//a[@data-params='lang=az']", "Azərbaycan"),
+        BE("//a[@data-params='lang=be']", "Беларуская"),
+        HY("//a[@data-params='lang=hy']", "Հայերեն"),
+        KA("//a[@data-params='lang=ka']", "Грузинский"),
+        RO("//a[@data-params='lang=ro']", "Română"),
+        KK("//a[@data-params='lang=kk']", "Қазақ");
+
+        private String path;
+        private String langName;
+
+        Language(String path, String langName) {
+            this.path = path;
+            this.langName = langName;
+        }
+
+        public String getPath() {
+            return path;
+        }
     }
 }

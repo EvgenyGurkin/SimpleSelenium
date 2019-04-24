@@ -6,7 +6,7 @@ import io.qameta.htmlelements.element.ExtendedWebElement;
 
 public interface SettingsControl extends ExtendedWebElement {
 
-    @FindBy("//*[@id=\"nb-3\"]")
+    @FindBy(".//*[@id='nb-3']")
     @Description("Кнопка вызова списка настроек")
     ExtendedWebElement settingsGhostButton();
 }
