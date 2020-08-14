@@ -47,6 +47,5 @@ public class SearchTest {
         sendRequest();
         findMisspelMessage();
         Assert.assertNotNull(findMisspelMessage());
-
     }
 }

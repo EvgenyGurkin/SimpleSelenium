@@ -9,8 +9,6 @@ import io.qameta.htmlelements.extension.page.BaseUrl;
 @BaseUrl("https://yandex.ru/")
 public interface Main extends WebPage {
 
-    // блок авторизации
-
     @FindBy("//div[contains(@class , 'i-bem desk-notif_js_inited')]")
     @Description("Блок авторизации")
     Authorization authorization();
@@ -23,7 +21,6 @@ public interface Main extends WebPage {
     @Description("Форма для ввода пароля")
     PassForm passForm();
 
-    // блок настроек
     @FindBy("//div[@data-key='view=head-settings-controls']")
     @Description("Панель настроек")
     SettingsControl settingsControl();
@@ -47,13 +44,11 @@ public interface Main extends WebPage {
 
     @FindBy("//div[@data-key='view=compose-fields-wrapper']")
     @Description("Форма для ввода адресата и темы письма")
-    AdressAndTheme adressAndTheme();
+    AddressAndTheme adressAndTheme();
 
     @FindBy("//div[@class='mail-Done js-done']")
     @Description("Панель появляющаяся при успешной отправке письма")
     MessageSend messageSend();
-
-    // блок писем
 
     @FindBy("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']")
     @Description("Список писем")
@@ -66,7 +61,6 @@ public interface Main extends WebPage {
     @FindBy("//div[contains(@class , 'tooltip___entities_[object Object] mail-Statusline')]")
     @Description("Панель предупреждения при удалении")
     DeleteWarning DeleteWarning();
-
 
 }
 

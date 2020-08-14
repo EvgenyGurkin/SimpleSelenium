@@ -1,12 +1,10 @@
 package pagemodels;
 
-import elements.MessagesList;
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 import io.qameta.htmlelements.WebPageFactory;
-import io.qameta.htmlelements.element.ExtendedList;
-import io.qameta.htmlelements.element.ExtendedWebElement;
 import io.qameta.htmlelements.matcher.DisplayedMatcher;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -19,18 +17,20 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.Main;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class YandexNew {
     private static final Logger logger = LoggerFactory.getLogger(YandexNew.class);
-    WebPageFactory factory = new WebPageFactory();
-    WebDriver driver;
+    private final String LOGIN = "123456asd";
+    private final String PASSWORD = "123456asdas";
     Main mp;
 
     @BeforeMethod(alwaysRun = true, description = "Перешли по адресу yandex.ru")
     private void setUp() {
+        WebPageFactory factory = new WebPageFactory();
+        WebDriver driver;
         driver = new ChromeDriver();
         mp = factory.get(driver, Main.class);
         mp.getWrappedDriver().manage().window().maximize();
@@ -45,11 +45,11 @@ public class YandexNew {
     }
 
     @Step("Зашли в почту {emailName} под паролем {password}")
-    private void quickLogin(String emailName, String password) {
+    private void quickLogin() {
         mp.authorization().mailAuthorizationButton().click();
-        mp.loginForm().loginField().sendKeys(emailName);
+        mp.loginForm().loginField().sendKeys(LOGIN);
         mp.loginForm().loginFormButton().click();
-        mp.passForm().passField().sendKeys(password);
+        mp.passForm().passField().sendKeys(PASSWORD);
         mp.passForm().passFormButton().click();
         mp.leftMailPanel().goToWriteButton()
                 .waitUntil("Ожидание того что мы успешно залогинились", DisplayedMatcher.displayed(), 5);
@@ -69,33 +69,24 @@ public class YandexNew {
         mp.leftMailPanel().goToWriteButton().click();
     }
 
-    @Step("Отправили сообщение с емайл адресом: {mailAdress}")
-    private void sendLetter(String mailAdress) {
-        mp.adressAndTheme().mailAdressField().sendKeys(mailAdress);
+    @Step("Отправили сообщение с емайл адресом: {mailAddress}")
+    private void sendLetter(String mailAddress) {
+        mp.adressAndTheme().mailAddressField().sendKeys(mailAddress);
         mp.composeHead().sendMessage().click();
     }
 
     @Step("Проверка сообщения выдаваемого при отправке")
     private void assertSendMail() {
         try {
-            if (mp.adressAndTheme().mailAdressError().isDisplayed()) {
-                if (mp.adressAndTheme().mailAdressError().getText().endsWith(".")) {
-                    Assert.assertTrue(mp.adressAndTheme().mailAdressError().isDisplayed());
-                } else if (mp.adressAndTheme().mailAdressError().getText().contains(":")) {
-                    Assert.assertTrue(mp.adressAndTheme().mailAdressError().isDisplayed());
-                } else {
-                    Assert.fail("Тест не пройден потому что ни одно из сообщений об ошибке адреса не было отображено");
-                }
-            }
-        } catch (WebDriverException e) {
-            logger.error("Сообщения об ошибке в адресе не были найдены");
-        }
-        try {
-            if (mp.messageSend().succesMailSend().isDisplayed()) {
+            if (mp.adressAndTheme().mailAddressError().isDisplayed()) {
+                Assert.assertTrue(mp.adressAndTheme().mailAddressError().getText().endsWith(".")
+                                || mp.adressAndTheme().mailAddressError().getText().contains(":"),
+                        "Тест не пройден потому что ни одно из сообщений об ошибке адреса не было отображено");
+            } else {
                 Assert.assertTrue(mp.messageSend().succesMailSend().isDisplayed());
             }
         } catch (WebDriverException e) {
-            logger.error("Сообщение об успешной отправке письма не было найдено");
+            logger.error("Сообщения об ошибке в адресе или успешной отправке не были найдены");
         }
     }
 
@@ -105,31 +96,25 @@ public class YandexNew {
                 .getText().replaceAll("[^0-9]+", ""));
     }
 
-    @Step("Выделение всех писем по адресу: {adress}")
-    private void selectAllAdressMailCheckbox(String adress) {
-        mp.messagesList().allMailCheckBoxes(adress).forEach(WebElement::click);
+    @Step("Выделение всех писем по адресу: {address}")
+    private void selectAllAddressMailCheckbox(String address) {
+        mp.messagesList().allMailCheckBoxes(address).forEach(WebElement::click);
     }
 
     @Step("Поиск всех выделенных писем")
-    private List<String> findChekedMailsId() {
-        ExtendedList<MessagesList> allCheckedLetters = mp.messagesList().allChekedMail();
-        List<String> chekedLettersId = new ArrayList<>();
-        for (ExtendedWebElement letId : allCheckedLetters) {
-            String id = letId.getAttribute("data-id");
-            chekedLettersId.add(id);
-        }
-        return chekedLettersId;
+    private List<String> findCheckedMailsId() {
+        return mp.messagesList().allCheckedMail()
+                .stream()
+                .map(e -> e.getAttribute("data-id"))
+                .collect(Collectors.toList());
     }
 
     @Step("Поиск всех писем")
     private List<String> findMailsId() {
-        ExtendedList<MessagesList> allCheckedLetters = mp.messagesList().allMail();
-        List<String> chekedLettersId = new ArrayList<>();
-        for (ExtendedWebElement letId : allCheckedLetters) {
-            String id = letId.getAttribute("data-id");
-            chekedLettersId.add(id);
-        }
-        return chekedLettersId;
+        return mp.messagesList().allMail()
+                .stream()
+                .map(e -> e.getAttribute("data-id"))
+                .collect(Collectors.toList());
     }
 
     @Step("Удаление выделенных писем")
@@ -140,7 +125,6 @@ public class YandexNew {
         } catch (WebDriverException e) {
             logger.error("Панель подтверждения удаления не была отображена");
         }
-
         try {
             mp.allSettings().allSettingsButton()
                     .waitUntil("Ожидание отображения каунтера", DisplayedMatcher.displayed(), 3);
@@ -150,16 +134,13 @@ public class YandexNew {
     }
 
     @Step("Проверка удаления писем")
-    private void assertDeleteLetters(List<String> temp1, List<String> temp2, int before, int after, String status) {
-        if (status.equals("delete")) {
+    private void assertDeleteLetters(List<String> temp1, List<String> temp2, int before, int after, boolean deleteLetters) {
+        if (deleteLetters) {
             Assert.assertEquals(after, before - temp1.size());
             Assert.assertTrue(Collections.disjoint(temp1, temp2));
-
-        }
-        if (status.equals("nodelete")) {
+        } else {
             Assert.assertEquals(after, before);
             Assert.assertTrue(temp2.containsAll(temp1));
-
         }
         Allure.addAttachment("Результат", "text/plain", "На странице было выделено " + temp1.size()
                 + " писем, после удаления на странице осталось "
@@ -168,7 +149,7 @@ public class YandexNew {
     }
 
     @Step("Смена языка на {lang}")
-    private void swithLanguage(Language lang) {
+    private void switchLanguage(Language lang) {
         mp.langAndSettings().langSettingsButton().click();
         try {
             mp.langAndSettings().allLangButtons(lang.getPath()).click();
@@ -188,23 +169,23 @@ public class YandexNew {
 
     @Test(groups = "SM-1")
     private void sendMessageCorrect() {
-        quickLogin("Seiron1", "210890-=");
+        quickLogin();
         goWriteLetter();
         sendLetter("Seiron2@yandex.ru");
         assertSendMail();
     }
 
     @Test(groups = "SM-2")
-    private void sendMessageIncorrectAdress() {
-        quickLogin("Seiron1", "210890-=");
+    private void sendMessageIncorrectAddress() {
+        quickLogin();
         goWriteLetter();
-        sendLetter("asdsa");
+        sendLetter(RandomStringUtils.randomAlphabetic(10));
         assertSendMail();
     }
 
     @Test(groups = "SM-3")
-    private void sendMessageWithoutAdress() {
-        quickLogin("Seiron1", "210890-=");
+    private void sendMessageWithoutAddress() {
+        quickLogin();
         goWriteLetter();
         sendLetter("");
         assertSendMail();
@@ -212,41 +193,43 @@ public class YandexNew {
 
     @Test(groups = "SW-1")
     private void switchLanguageTo1() {
-        quickLogin("Seiron1", "210890-=");
+        quickLogin();
         goInSettings();
-        swithLanguage(Language.EN);
-        assertLanguage(Language.EN);
+        Language en = Language.EN;
+        switchLanguage(en);
+        assertLanguage(en);
     }
 
     @Test(groups = "SW-2")
     private void switchLanguageTo2() {
-        quickLogin("Seiron1", "210890-=");
+        quickLogin();
         goInSettings();
-        swithLanguage(Language.RU);
-        assertLanguage(Language.RU);
+        Language ru = Language.RU;
+        switchLanguage(ru);
+        assertLanguage(ru);
     }
 
     @Test(groups = "DL-1")
-    private void simpleDeletLetters() {
-        quickLogin("Seiron1", "210890-=");
+    private void simpleDeleteLetters() {
+        quickLogin();
         int before = checkMailCounter();
-        selectAllAdressMailCheckbox("seiron1@yandex.ru");
-        List<String> Temp1 = findChekedMailsId();
+        selectAllAddressMailCheckbox("seiron1@yandex.ru");
+        List<String> Temp1 = findCheckedMailsId();
         deleteLetters();
         List<String> Temp2 = findMailsId();
         int after = checkMailCounter();
-        assertDeleteLetters(Temp1, Temp2, before, after, "delete");
+        assertDeleteLetters(Temp1, Temp2, before, after, true);
     }
 
     @Test(groups = "DL-2")
     private void deleteNoLetters() {
-        quickLogin("Seiron1", "210890-=");
+        quickLogin();
         int before = checkMailCounter();
-        selectAllAdressMailCheckbox("seiron1@yandex.ru");
-        List<String> Temp1 = findChekedMailsId();
+        selectAllAddressMailCheckbox("seiron1@yandex.ru");
+        List<String> Temp1 = findCheckedMailsId();
         List<String> Temp2 = findMailsId();
         int after = checkMailCounter();
-        assertDeleteLetters(Temp1, Temp2, before, after, "nodelete");
+        assertDeleteLetters(Temp1, Temp2, before, after, false);
     }
 
     public enum Language {
@@ -262,8 +245,8 @@ public class YandexNew {
         RO("ro", "Română"),
         KK("kk", "Қазақ");
 
-        private String path;
-        private String langName;
+        private final String path;
+        private final String langName;
 
         Language(String path, String langName) {
             this.path = path;
